@@ -1,34 +1,14 @@
 import { useState } from "react";
 import "./App.css";
-import ImageWithLoading from "./components/ImageComponent"
+import ImageWithLoading from "./components/ImageWithLoading"
+import PrevPageButton from "./components/PrevPageButton";
+import NextPageButton from "./components/NextPageButton";
+import SearchForm from "./components/SearchForm";
+import useImageFetcher from "./hooks/useImageFetcher"; 
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [imageArr, setImageArr] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-
-  async function imgFetcher(url) {
-    try {
-      setIsLoading(true);
-      const result = await fetch(url, {
-        headers: {
-          Authorization:
-            "W6bYqFI1SzJNvBEtXfVsX0lLi64vy0wcFTyd41cXBnd1RflHPiJcSLPk",
-        },
-      });
-      const data = await result.json();
-      setImageArr(data);
-
-      console.log(data);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  
+  const { imageArr, isLoading, imgFetcher, setImageArr} = useImageFetcher();
 
   function searchFormSubmit(e) {
     e.preventDefault();
@@ -49,21 +29,8 @@ function App() {
   return (
     <>
       <div className=" absolute top-0" id="top"></div>
-      <form
-        className="fixed top-0 left-1/2 -translate-x-1/2 my-6"
-        onSubmit={searchFormSubmit}
-      >
-        <input
-          type="text"
-          className="border text-lg border-black py-2 px-3 outline-none mx-2 rounded-s-lg focus:bg-black focus:text-white"
-          placeholder="Search here..."
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-        />
-        <button className="border text-lg border-black py-2 px-3 bg-white hover:bg-black hover:text-white transition-all rounded-e-lg">
-          Go
-        </button>
-      </form>
+
+      <SearchForm searchFormSubmit={searchFormSubmit} setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
 
       <h1 className="text-2xl text-black w-100 text-center mt-20">
         {isLoading ? "Loading..." : ""}
@@ -71,8 +38,9 @@ function App() {
       {imageArr.photos && !isLoading && imageArr.photos.length <= 0 ? (
         <h3 className="text-center text-2xl">Image not found.</h3>
       ) : (
-        <div className="container mx-auto ">
-          <div className="flex justify-between">
+        <div className="container sm:mx-auto px-2">
+
+          <div className="flex justify-between sm:px-2">
             <h4 className="text-lg font-semibold">
               {imageArr.total_results &&
                 `Image's found : ${imageArr.total_results}`}
@@ -84,11 +52,12 @@ function App() {
                 )}`}
             </h4>
           </div>
-          <div className="grid grid-cols-4 mt-4 gap-2">
+
+          <div className="grid mt-4 gap-2 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 container">
             {imageArr.photos &&
               imageArr.photos.map((image, key) => (
-                <div key={key} className=" overflow-hidden border">
-                  <ImageWithLoading src={image.src.original} />
+                <div key={key} className="overflow-hidden border rounded-md">
+                  <ImageWithLoading src={image.src.large} />
                 </div>
               ))}
           </div>
@@ -96,25 +65,13 @@ function App() {
       )}
       <div className="text-center mt-10 mb-20">
         {imageArr && imageArr.prev_page ? (
-          <a
-            href="#top"
-            onClick={prevPageClickHandler}
-            className="rounded-lg border-none bg-green-700 text-white hover:bg-green-900 px-4 py-3 text-lg font-semibold mx-3"
-          >
-            {"<"} Prev
-          </a>
+          <PrevPageButton prevPageClickHandler={prevPageClickHandler} />
         ) : (
           ""
         )}
 
         {imageArr && imageArr.next_page ? (
-          <a
-            href="#top"
-            onClick={nextPageClickHandler}
-            className="rounded-lg border-none bg-green-700 text-white hover:bg-green-900 px-4 py-3 text-lg font-semibold"
-          >
-            Next {">"}
-          </a>
+         <NextPageButton nextPageClickHandler={nextPageClickHandler} />
         ) : (
           ""
         )}
