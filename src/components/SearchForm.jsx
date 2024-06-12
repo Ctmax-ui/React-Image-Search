@@ -10,6 +10,7 @@ const SearchForm = ({searchFormSubmit, setSearchQuery, searchQuery}) => {
           placeholder="Search here..."
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
+          required
         />
         <button className="border text-lg border-black py-2 px-3 bg-white hover:bg-black hover:text-white transition-all rounded-e-lg">
           Go

@@ -12,7 +12,7 @@ function App() {
       <Routes>
         <Route path="/" />
         <Route index element={<SearchImg />} />
-        <Route path=":imageId" element={<SingleImg />} />
+        <Route path="/:imageId" element={<SingleImg />} />
       </Routes>
     </>
   );

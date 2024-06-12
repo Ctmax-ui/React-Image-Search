@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Routes, Route } from "react-router-dom";
 
 import useImageFetcher from "../hooks/useImageFetcher";
@@ -11,26 +11,40 @@ import SingleImg from "./SingleImg";
 
 
 const SearchImg = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const { imageArr, isLoading, imgFetcher, setImageArr, currentUrl, setCurrentUrl } = useImageFetcher();
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const { imageArr, isLoading, imgFetcher, setImageArr } = useImageFetcher();
-  
-    function searchFormSubmit(e) {
-      e.preventDefault();
-      setImageArr([]);
-      imgFetcher(`https://api.pexels.com/v1/search?query=${searchQuery}`);
-      setSearchQuery("");
+  useEffect(() => {
+    const savedUrl = sessionStorage.getItem('sessionImagePage');
+    if (savedUrl) {
+      imgFetcher(JSON.parse(savedUrl));
+      // console.log(savedUrl);
     }
-  
-    function nextPageClickHandler() {
-      setImageArr([]);
-      imgFetcher(imageArr.next_page);
-    }
-    function prevPageClickHandler() {
-      setImageArr([]);
-      imgFetcher(imageArr.prev_page);
-    }
+  }, []);
 
+  useEffect(() => {
+    if (currentUrl) {
+      sessionStorage.setItem('sessionImagePage', JSON.stringify(currentUrl));
+    }
+  }, [currentUrl]);
+
+  const searchFormSubmit = (e) => {
+    e.preventDefault();
+    setImageArr([]);
+    const url = `https://api.pexels.com/v1/search?query=${searchQuery}`;
+    imgFetcher(url);
+    setSearchQuery("");
+  };
+
+  const nextPageClickHandler = () => {
+    setImageArr([]);
+    imgFetcher(imageArr.next_page);
+  };
+
+  const prevPageClickHandler = () => {
+    setImageArr([]);
+    imgFetcher(imageArr.prev_page);
+  };
   return (
     <>
       <div className=" absolute top-0" id="top"></div>
@@ -64,7 +78,8 @@ const SearchImg = () => {
             {imageArr.photos &&
               imageArr.photos.map((image, key) => (
                 <div key={key} className="overflow-hidden border rounded-md">
-                  <Link to={`/${image.id}`}>
+                  <Link to={`/${image.id}`}
+                  >
                     <ImageWithLoading src={image.src.large} />
                   </Link>
                 </div>
